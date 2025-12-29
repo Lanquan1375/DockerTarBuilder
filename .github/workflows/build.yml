@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Pull Scrutiny Image
-        run: docker pull ghcr.io/analogj/scrutiny:master-web --platform linux/amd64
+        run: docker pull ghcr.io/analogj/scrutiny:master-collector-web --platform linux/amd64
 
       - name: Save and Compress Image
         run: |
