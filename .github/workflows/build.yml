@@ -1,25 +1,34 @@
-name: Build Scrutiny Omnibus Image
+name: Build Scrutiny Offline Images
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # 仅手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # 第一步：拉取正确的 omnibus 镜像
-      - name: Pull Scrutiny Image (master-omnibus tag)
-        run: docker pull ghcr.io/analogj/scrutiny:master-omnibus --platform linux/amd64
-
-      # 第二步：保存并压缩镜像（核心修正：统一文件名）
-      - name: Save and Compress Image
+      # 步骤1：拉取 Scrutiny Web 镜像
+      - name: Pull Scrutiny Web Image
         run: |
-          docker save ghcr.io/analogj/scrutiny:master-omnibus -o scrutiny_omnibus.tar
-          gzip scrutiny_omnibus.tar  # 这里必须和上一行的输出文件名一致
+          docker pull ghcr.io/analogj/scrutiny:master-web --platform linux/amd64
 
-      # 第三步：上传打包好的文件
-      - name: Upload Artifact
+      # 步骤2：拉取 Scrutiny Collector 镜像
+      - name: Pull Scrutiny Collector Image
+        run: |
+          docker pull ghcr.io/analogj/scrutiny:master-collector --platform linux/amd64
+
+      # 步骤3：将两个镜像分别打包并压缩
+      - name: Save and Compress Images
+        run: |
+          docker save ghcr.io/analogj/scrutiny:master-web -o scrutiny-web.tar
+          docker save ghcr.io/analogj/scrutiny:master-collector -o scrutiny-collector.tar
+          gzip scrutiny-web.tar
+          gzip scrutiny-collector.tar
+
+      # 步骤4：将打包好的文件上传，供您下载
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: scrutiny-omnibus-amd64  # 产物名称也同步更新
-          path: scrutiny_omnibus.tar.gz # 这里必须和gzip生成的文件名一致
+          name: scrutiny-offline-images
+          path: |
+            *.tar.gz
