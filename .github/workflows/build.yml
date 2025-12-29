@@ -9,12 +9,12 @@ jobs:
     steps:
       # 第一步：拉取官方最新版镜像
       - name: Pull Scrutiny Image (latest tag)
-        run: docker pull ghcr.io/analogj/scrutiny:latest --platform linux/amd64
+        run: docker pull ghcr.io/analogj/scrutiny:master-omnibus --platform linux/amd64
 
       # 第二步：将镜像保存并压缩为 .tar.gz 文件
       - name: Save and Compress Image
         run: |
-          docker save ghcr.io/analogj/scrutiny:latest -o scrutiny_latest.tar
+          docker save ghcr.io/analogj/scrutiny:master-omnibus -o scrutiny_omnibus.tar
           gzip scrutiny_latest.tar
 
       # 第三步：将打包好的文件上传，供你下载
