@@ -1,25 +1,25 @@
-name: Build Scrutiny Latest Image
+name: Build Scrutiny Omnibus Image
 
 on:
-  workflow_dispatch:  # 这表示允许手动触发运行
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # 在最新的Ubuntu系统上运行
+    runs-on: ubuntu-latest
     steps:
-      # 第一步：拉取官方最新版镜像
-      - name: Pull Scrutiny Image (latest tag)
+      # 第一步：拉取正确的 omnibus 镜像
+      - name: Pull Scrutiny Image (master-omnibus tag)
         run: docker pull ghcr.io/analogj/scrutiny:master-omnibus --platform linux/amd64
 
-      # 第二步：将镜像保存并压缩为 .tar.gz 文件
+      # 第二步：保存并压缩镜像（核心修正：统一文件名）
       - name: Save and Compress Image
         run: |
           docker save ghcr.io/analogj/scrutiny:master-omnibus -o scrutiny_omnibus.tar
-          gzip scrutiny_latest.tar
+          gzip scrutiny_omnibus.tar  # 这里必须和上一行的输出文件名一致
 
-      # 第三步：将打包好的文件上传，供你下载
+      # 第三步：上传打包好的文件
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: scrutiny-latest-amd64  # 下载的压缩包会叫这个名字
-          path: scrutiny_latest.tar.gz # 上传我们刚做好的文件
+          name: scrutiny-omnibus-amd64  # 产物名称也同步更新
+          path: scrutiny_omnibus.tar.gz # 这里必须和gzip生成的文件名一致
