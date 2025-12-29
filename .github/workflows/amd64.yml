@@ -1,24 +1,29 @@
-name: x86-64 Pull and Save Docker Image
+name: Build Scrutiny Image
 on:
   workflow_dispatch:
     inputs:
-      docker_images:
-        description: '请填写docker镜像名称 多个用英文逗号分开'
+      target_image:
+        description: 'Docker image name'
         required: true
-        default: 'alpine:latest,busybox:stable-glibc'  # 设置默认的 Docker 镜像列表
+        default: 'ghcr.io/analogj/scrutiny:master-web'
 
 jobs:
-  pull_and_package:
+  build:
     runs-on: ubuntu-22.04
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Clean up Docker to free space
-      run: |
-          docker system prune -a -f
-          docker volume prune -f
+      - name: Pull Docker Image
+        run: docker pull ${{ github.event.inputs.target_image }} --platform linux/amd64
+      - name: Save to Tar and Compress
+        run: |
+          # 将镜像名称中的 '/' 和 ':' 替换为 '_' 作为文件名
+          filename=$(echo "${{ github.event.inputs.target_image }}" | sed 's/[\/:]/-/g')
+          docker save ${{ github.event.inputs.target_image }} -o "${filename}.tar"
+          gzip "${filename}.tar"
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scrutiny-image
+          path: *.tar.gz
 
     - name: Pull Docker Images and Package
       run: |
