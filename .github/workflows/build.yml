@@ -1,0 +1,22 @@
+name: Build Scrutiny Image
+
+on:
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Scrutiny Image
+        run: docker pull ghcr.io/analogj/scrutiny:master-web --platform linux/amd64
+
+      - name: Save and Compress Image
+        run: |
+          docker save ghcr.io/analogj/scrutiny:master-web -o scrutiny.tar
+          gzip scrutiny.tar
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scrutiny-image-amd64
+          path: scrutiny.tar.gz
